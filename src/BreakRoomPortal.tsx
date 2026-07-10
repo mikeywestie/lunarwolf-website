@@ -15,7 +15,9 @@ function BreakRoomPortal() {
 
     contact.parentElement.insertBefore(host, contact)
 
-    return () => host.remove()
+    return () => {
+      host.remove()
+    }
   }, [host])
 
   return createPortal(<FlappyWolf />, host)
