@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://lunarwolf-software.netlify.app/sitemap.xml
