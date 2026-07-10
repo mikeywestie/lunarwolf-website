@@ -4,7 +4,9 @@
   height: 58px;
   object-fit: contain;
   filter: drop-shadow(0 0 18px rgba(112, 200, 255, 0.16));
-  transition: transform 0.25s ease, filter 0.25s ease;
+  transition:
+    transform 0.25s ease,
+    filter 0.25s ease;
 }
 
 .brand:hover .brand-logo {
@@ -35,7 +37,9 @@
 
 .hero .text-link {
   color: var(--accent-soft);
-  transition: color 0.2s ease, transform 0.2s ease;
+  transition:
+    color 0.2s ease,
+    transform 0.2s ease;
 }
 
 .hero .text-link:hover {
@@ -48,7 +52,11 @@
   place-items: center;
   min-height: 560px;
   background:
-    radial-gradient(circle at var(--spot-x) var(--spot-y), rgba(151, 220, 255, 0.13), transparent 20%),
+    radial-gradient(
+      circle at var(--spot-x) var(--spot-y),
+      rgba(151, 220, 255, 0.13),
+      transparent 20%
+    ),
     radial-gradient(circle at 50% 44%, rgba(53, 157, 226, 0.12), transparent 38%),
     linear-gradient(145deg, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.008));
 }
@@ -70,8 +78,7 @@
   width: min(76%, 390px);
   height: auto;
   object-fit: contain;
-  filter:
-    drop-shadow(0 24px 40px rgba(0, 0, 0, 0.32))
+  filter: drop-shadow(0 24px 40px rgba(0, 0, 0, 0.32))
     drop-shadow(0 0 30px rgba(112, 200, 255, 0.18));
   animation: lunarwolf-float 6s ease-in-out infinite;
 }
@@ -143,8 +150,13 @@
 }
 
 @keyframes lunarwolf-float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 @media (max-width: 900px) {

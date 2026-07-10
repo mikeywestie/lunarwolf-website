@@ -106,11 +106,21 @@ function App() {
         </a>
 
         <nav className={menuOpen ? 'nav-open' : ''} aria-label="Primary navigation">
-          <a href="#work" onClick={closeMenu}>Work</a>
-          <a href="#services" onClick={closeMenu}>Services</a>
-          <a href="#process" onClick={closeMenu}>Process</a>
-          <a href="#about" onClick={closeMenu}>About</a>
-          <a href="#contact" onClick={closeMenu}>Contact</a>
+          <a href="#work" onClick={closeMenu}>
+            Work
+          </a>
+          <a href="#services" onClick={closeMenu}>
+            Services
+          </a>
+          <a href="#process" onClick={closeMenu}>
+            Process
+          </a>
+          <a href="#about" onClick={closeMenu}>
+            About
+          </a>
+          <a href="#contact" onClick={closeMenu}>
+            Contact
+          </a>
           <span className="portal-link">Portal · Soon</span>
         </nav>
 
@@ -187,10 +197,14 @@ function App() {
         </section>
 
         <section className="proof-strip" aria-label="LunarWolf capabilities">
-          <span>Strategy</span><i />
-          <span>Design</span><i />
-          <span>Engineering</span><i />
-          <span>Automation</span><i />
+          <span>Strategy</span>
+          <i />
+          <span>Design</span>
+          <i />
+          <span>Engineering</span>
+          <i />
+          <span>Automation</span>
+          <i />
           <span>Support</span>
         </section>
 
@@ -220,7 +234,11 @@ function App() {
             <div className="case-visual">
               <span className="live-pill">Live project</span>
               <div className="browser-frame">
-                <div className="browser-bar"><span /><span /><span /></div>
+                <div className="browser-bar">
+                  <span />
+                  <span />
+                  <span />
+                </div>
                 <div className="browser-content">
                   <small>EXCLUSIVE PETS</small>
                   <strong>Grooming with as much care as love.</strong>
@@ -236,7 +254,9 @@ function App() {
                 contact details, and bookings into one clear customer journey.
               </p>
               <div className="case-meta">
-                <span>Responsive</span><span>Fast</span><span>Live on Netlify</span>
+                <span>Responsive</span>
+                <span>Fast</span>
+                <span>Live on Netlify</span>
               </div>
               <span className="text-link">
                 View live website <ArrowRight size={16} aria-hidden="true" />
@@ -314,13 +334,7 @@ function App() {
               <strong>Clear thinking.</strong>
               <strong>Strong engineering.</strong>
               <strong>Honest delivery.</strong>
-              <img
-                src="/brand/lunarwolf-logo.png"
-                alt=""
-                width={492}
-                height={220}
-                loading="lazy"
-              />
+              <img src="/brand/lunarwolf-logo.png" alt="" width={492} height={220} loading="lazy" />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -345,7 +359,10 @@ function App() {
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                 >
                   <Icon size={22} />
-                  <div><h3>{title}</h3><p>{text}</p></div>
+                  <div>
+                    <h3>{title}</h3>
+                    <p>{text}</p>
+                  </div>
                 </motion.article>
               ))}
             </div>
