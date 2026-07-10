@@ -3,21 +3,22 @@ import { createPortal } from 'react-dom'
 import FlappyWolf from './FlappyWolf'
 
 function BreakRoomPortal() {
-  const [host, setHost] = useState<HTMLElement | null>(null)
+  const [host] = useState(() => {
+    const mount = document.createElement('div')
+    mount.dataset.breakRoomMount = 'true'
+    return mount
+  })
 
   useEffect(() => {
     const contact = document.getElementById('contact')
     if (!contact?.parentElement) return
 
-    const mount = document.createElement('div')
-    mount.dataset.breakRoomMount = 'true'
-    contact.parentElement.insertBefore(mount, contact)
-    setHost(mount)
+    contact.parentElement.insertBefore(host, contact)
 
-    return () => mount.remove()
-  }, [])
+    return () => host.remove()
+  }, [host])
 
-  return host ? createPortal(<FlappyWolf />, host) : null
+  return createPortal(<FlappyWolf />, host)
 }
 
 export default BreakRoomPortal
