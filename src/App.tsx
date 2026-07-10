@@ -105,21 +105,11 @@ function App() {
         </a>
 
         <nav className={menuOpen ? 'nav-open' : ''} aria-label="Primary navigation">
-          <a href="#work" onClick={closeMenu}>
-            Work
-          </a>
-          <a href="#services" onClick={closeMenu}>
-            Services
-          </a>
-          <a href="#process" onClick={closeMenu}>
-            Process
-          </a>
-          <a href="#about" onClick={closeMenu}>
-            About
-          </a>
-          <a href="#contact" onClick={closeMenu}>
-            Contact
-          </a>
+          <a href="#work" onClick={closeMenu}>Work</a>
+          <a href="#services" onClick={closeMenu}>Services</a>
+          <a href="#process" onClick={closeMenu}>Process</a>
+          <a href="#about" onClick={closeMenu}>About</a>
+          <a href="#contact" onClick={closeMenu}>Contact</a>
           <span className="portal-link">Portal · Soon</span>
         </nav>
 
@@ -147,14 +137,21 @@ function App() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7 }}
           >
-            <p className="eyebrow">Software studio · Johannesburg</p>
+            <p className="eyebrow">Independent software studio · South Africa</p>
             <h1>
               Building software. <span>Solving problems.</span> Creating impact.
             </h1>
+            <p className="hero-lead">
+              LunarWolf designs and builds modern websites, custom software, and intelligent
+              automation that businesses can rely on.
+            </p>
             <div className="hero-actions">
               <MagneticLink className="button" href="#contact" strength={10}>
                 Start Your Project <ArrowRight size={18} aria-hidden="true" />
               </MagneticLink>
+              <a className="text-link" href="#work">
+                Explore our work <ArrowRight size={16} aria-hidden="true" />
+              </a>
             </div>
             <div className="hero-proof">
               <span>Live client work</span>
@@ -170,36 +167,29 @@ function App() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.8, delay: 0.15 }}
             onMouseMove={handleStageMouseMove}
-            aria-hidden="true"
+            aria-label="LunarWolf official brand crest"
           >
             <StarField className="crest-stars" />
             <div className="crest-glow" />
             <div className="crest-ring crest-ring-one" />
             <div className="crest-ring crest-ring-two" />
             <div className="crest-spotlight" />
-            <picture>
-              <source srcSet="/brand/lunarwolf-mark.webp" type="image/webp" />
-              <img
-                src="/brand/lunarwolf-mark.png"
-                alt=""
-                width={520}
-                height={520}
-                className="crest-mark"
-              />
-            </picture>
+            <img
+              src="/brand/lunarwolf-logo.png"
+              alt="LunarWolf — Software and AI Solutions"
+              width={492}
+              height={220}
+              className="crest-logo"
+            />
             <div className="crest-caption">Strategy · Design · Engineering · Growth</div>
           </motion.div>
         </section>
 
         <section className="proof-strip" aria-label="LunarWolf capabilities">
-          <span>Strategy</span>
-          <i />
-          <span>Design</span>
-          <i />
-          <span>Engineering</span>
-          <i />
-          <span>Automation</span>
-          <i />
+          <span>Strategy</span><i />
+          <span>Design</span><i />
+          <span>Engineering</span><i />
+          <span>Automation</span><i />
           <span>Support</span>
         </section>
 
@@ -229,11 +219,7 @@ function App() {
             <div className="case-visual">
               <span className="live-pill">Live project</span>
               <div className="browser-frame">
-                <div className="browser-bar">
-                  <span />
-                  <span />
-                  <span />
-                </div>
+                <div className="browser-bar"><span /><span /><span /></div>
                 <div className="browser-content">
                   <small>EXCLUSIVE PETS</small>
                   <strong>Grooming with as much care as love.</strong>
@@ -249,9 +235,7 @@ function App() {
                 contact details, and bookings into one clear customer journey.
               </p>
               <div className="case-meta">
-                <span>Responsive</span>
-                <span>Fast</span>
-                <span>Live on Netlify</span>
+                <span>Responsive</span><span>Fast</span><span>Live on Netlify</span>
               </div>
               <span className="text-link">
                 View live website <ArrowRight size={16} aria-hidden="true" />
@@ -319,17 +303,21 @@ function App() {
         <section className="section-pad about-section" id="about">
           <div className="about-grid">
             <motion.div
-              className="about-visual"
+              className="about-manifesto"
               initial={{ opacity: 0, x: -24 }}
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] as const }}
             >
+              <span className="manifesto-kicker">LunarWolf standard</span>
+              <strong>Clear thinking.</strong>
+              <strong>Strong engineering.</strong>
+              <strong>Honest delivery.</strong>
               <img
-                src="/brand/lunarwolf-office.jpg"
-                alt="LunarWolf's workspace, showing the brand mark, a code editor, and a desk set up for focused engineering work"
-                width={1200}
-                height={800}
+                src="/brand/lunarwolf-logo.png"
+                alt=""
+                width={492}
+                height={220}
                 loading="lazy"
               />
             </motion.div>
@@ -356,10 +344,7 @@ function App() {
                   transition={{ delay: index * 0.1, duration: 0.5 }}
                 >
                   <Icon size={22} />
-                  <div>
-                    <h3>{title}</h3>
-                    <p>{text}</p>
-                  </div>
+                  <div><h3>{title}</h3><p>{text}</p></div>
                 </motion.article>
               ))}
             </div>
