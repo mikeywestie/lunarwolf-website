@@ -11,6 +11,7 @@ import {
 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import './featured-projects.css'
+import './featured-projects-v2.css'
 
 type Project = {
   number: string
@@ -112,7 +113,9 @@ function ProjectVisual({ project }: { project: Project }) {
     <div className={`project-showcase-visual project-visual-${project.visual}`}>
       <div className="project-visual-topline">
         <span className="project-showcase-number">{project.number}</span>
-        <span className="project-status"><i /> {project.status}</span>
+        <span className="project-status">
+          <i /> {project.status}
+        </span>
         <span className="project-showcase-icon" aria-hidden="true">
           <Icon size={22} />
         </span>
@@ -182,7 +185,11 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
           rel={external ? 'noopener noreferrer' : undefined}
         >
           {project.action}
-          {external ? <ExternalLink size={16} aria-hidden="true" /> : <ArrowRight size={17} aria-hidden="true" />}
+          {external ? (
+            <ExternalLink size={16} aria-hidden="true" />
+          ) : (
+            <ArrowRight size={17} aria-hidden="true" />
+          )}
           {external && <span className="sr-only"> (opens in a new tab)</span>}
         </a>
       </div>
