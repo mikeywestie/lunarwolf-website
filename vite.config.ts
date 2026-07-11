@@ -2,7 +2,7 @@ import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 
-const pagesBase = '/lunarwolf-website/'
+const pagesBase = '/lunarwolf-software/'
 
 function rewritePublicAssetPaths(): Plugin {
   return {
