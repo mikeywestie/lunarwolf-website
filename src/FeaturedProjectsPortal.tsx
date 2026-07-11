@@ -133,13 +133,18 @@ export default function FeaturedProjectsPortal() {
   const [target, setTarget] = useState<HTMLElement | null>(null)
 
   useEffect(() => {
-    const workSection = document.getElementById('work')
-    if (!workSection) return
+    const frame = window.requestAnimationFrame(() => {
+      const workSection = document.getElementById('work')
+      if (!workSection) return
 
-    workSection.classList.add('featured-work-mounted')
-    setTarget(workSection)
+      workSection.classList.add('featured-work-mounted')
+      setTarget(workSection)
+    })
 
-    return () => workSection.classList.remove('featured-work-mounted')
+    return () => {
+      window.cancelAnimationFrame(frame)
+      document.getElementById('work')?.classList.remove('featured-work-mounted')
+    }
   }, [])
 
   if (!target) return null
