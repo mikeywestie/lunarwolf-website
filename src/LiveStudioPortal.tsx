@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ExternalLink, Eye, Radio, ShieldCheck, Users, Video, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import './live-studio.css'
+import './live-studio-room.css'
 
 type StudioMode = 'menu' | 'watch' | 'join'
 
