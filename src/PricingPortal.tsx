@@ -63,6 +63,10 @@ export default function PricingPortal() {
     return () => window.cancelAnimationFrame(frame)
   }, [])
 
+  const selectPlan = (plan: string) => {
+    window.dispatchEvent(new CustomEvent('lunarwolf:select-plan', { detail: plan }))
+  }
+
   if (!target) return null
 
   return createPortal(
@@ -110,7 +114,11 @@ export default function PricingPortal() {
                 </li>
               ))}
             </ul>
-            <a className="pricing-action" href="#contact">
+            <a
+              className="pricing-action"
+              href="#contact"
+              onClick={() => selectPlan(option.name)}
+            >
               <MessageCircle size={17} aria-hidden="true" /> Discuss this option
             </a>
           </motion.article>
@@ -120,8 +128,8 @@ export default function PricingPortal() {
       <div className="pricing-flex-note">
         <strong>No two projects are exactly alike.</strong>
         <span>
-          We will shape the scope together before any work begins, so you understand what is
-          included and why.
+          We will shape the scope together before any work begins, so you understand what is included
+          and why.
         </span>
       </div>
     </div>,
