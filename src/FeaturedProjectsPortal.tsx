@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import {
-  ArrowRight,
-  Bot,
-  PawPrint,
-  ShoppingCart,
-  Smartphone,
-  type LucideIcon,
-} from 'lucide-react'
+import { ArrowRight, Bot, PawPrint, ShoppingCart, Smartphone, type LucideIcon } from 'lucide-react'
 import { motion } from 'framer-motion'
 import './featured-projects.css'
 
@@ -178,7 +171,10 @@ export default function FeaturedProjectsPortal() {
       </div>
 
       <div className="featured-projects-note">
-        <p>Have a project that does not fit neatly into a package? We will shape the right solution together.</p>
+        <p>
+          Have a project that does not fit neatly into a package? We will shape the right solution
+          together.
+        </p>
         <a className="text-link" href="#contact">
           Start a conversation <ArrowRight size={16} aria-hidden="true" />
         </a>
