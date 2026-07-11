@@ -33,8 +33,7 @@
   border-radius: 22px;
   overflow: hidden;
   background:
-    radial-gradient(circle at 50% 30%, rgba(112, 200, 255, 0.12), transparent 38%),
-    #071522;
+    radial-gradient(circle at 50% 30%, rgba(112, 200, 255, 0.12), transparent 38%), #071522;
 }
 
 .founder-portrait-wrap::after {
