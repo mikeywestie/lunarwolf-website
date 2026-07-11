@@ -136,7 +136,9 @@ export default function LiveStudioPortal() {
 
                   <div className="live-studio-privacy">
                     <ShieldCheck size={18} />
-                    <span>Nothing is recorded or shared without a separate, clear consent step.</span>
+                    <span>
+                      Nothing is recorded or shared without a separate, clear consent step.
+                    </span>
                   </div>
                 </div>
               )}
@@ -203,7 +205,8 @@ export default function LiveStudioPortal() {
                   </div>
 
                   <p className="live-studio-footnote">
-                    Host approval and real broadcasting will be connected in a later backend milestone.
+                    Host approval and real broadcasting will be connected in a later backend
+                    milestone.
                   </p>
                 </div>
               )}
