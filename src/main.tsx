@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client'
 import App from './App'
 import BreakRoomPortal from './BreakRoomPortal'
 import FeaturedProjectsPortal from './FeaturedProjectsPortal'
+import LiveStudioPortal from './LiveStudioPortal'
 import '@fontsource-variable/inter/standard.css'
 import './index.css'
 
@@ -11,5 +12,6 @@ createRoot(document.getElementById('root')!).render(
     <App />
     <FeaturedProjectsPortal />
     <BreakRoomPortal />
+    <LiveStudioPortal />
   </StrictMode>,
 )
