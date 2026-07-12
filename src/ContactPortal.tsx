@@ -1,12 +1,5 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
-import {
-  CalendarDays,
-  ExternalLink,
-  Mail,
-  MessageCircle,
-  Send,
-  ShieldCheck,
-} from 'lucide-react'
+import { CalendarDays, ExternalLink, Mail, MessageCircle, Send, ShieldCheck } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import './contact.css'
@@ -132,8 +125,8 @@ export default function ContactPortal() {
           <p className="contact-kicker">Free discovery call</p>
           <h3 id="booking-heading">Choose a time that works for you.</h3>
           <p>
-            Book a focused 30-minute conversation about your goals, scope, timeline, and the best next
-            step for your project.
+            Book a focused 30-minute conversation about your goals, scope, timeline, and the best
+            next step for your project.
           </p>
           <div className="calendly-booking-meta" aria-label="Discovery call details">
             <span>30 minutes</span>
