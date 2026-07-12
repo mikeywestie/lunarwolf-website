@@ -1,10 +1,11 @@
 import { useState } from 'react'
-import { ExternalLink, Eye, Radio, ShieldCheck, Users, Video, X } from 'lucide-react'
+import { ExternalLink, Eye, Radio, ShieldCheck, Users, Video, WandSparkles, X } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import VisionStudioPanel from './VisionStudioPanel'
 import './live-studio.css'
 import './live-studio-room.css'
 
-type StudioMode = 'menu' | 'watch' | 'join'
+type StudioMode = 'menu' | 'watch' | 'join' | 'effects'
 
 const configuredRoomUrl = import.meta.env.VITE_LIVE_STUDIO_ROOM_URL as string | undefined
 const roomUrl =
@@ -32,6 +33,8 @@ export default function LiveStudioPortal() {
     setMode('menu')
   }
 
+  const expanded = roomOpen || mode === 'effects'
+
   return (
     <>
       <button className="live-studio-trigger" type="button" onClick={() => setOpen(true)}>
@@ -52,7 +55,7 @@ export default function LiveStudioPortal() {
             }}
           >
             <motion.section
-              className={`live-studio-panel${roomOpen ? ' live-studio-panel-room' : ''}`}
+              className={`live-studio-panel${expanded ? ' live-studio-panel-room' : ''}`}
               initial={{ opacity: 0, y: 24, scale: 0.98 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 18, scale: 0.98 }}
@@ -83,7 +86,7 @@ export default function LiveStudioPortal() {
                   <h2 id="live-studio-title">Step inside the studio.</h2>
                   <p>
                     Join real live coding sessions, product walkthroughs, and Q&amp;As directly from
-                    the LunarWolf website.
+                    the LunarWolf website—or test the new browser-based camera effects engine.
                   </p>
 
                   <div className="live-studio-options">
@@ -103,6 +106,13 @@ export default function LiveStudioPortal() {
                         Enter the same live room and choose when to enable your devices.
                       </small>
                     </button>
+                    <button type="button" onClick={() => chooseMode('effects')}>
+                      <span>
+                        <WandSparkles size={22} />
+                      </span>
+                      <strong>Vision Studio</strong>
+                      <small>Test live camera transparency, portal effects, freeze, and snapshots.</small>
+                    </button>
                   </div>
 
                   <div className="live-studio-privacy">
@@ -115,7 +125,22 @@ export default function LiveStudioPortal() {
                 </div>
               )}
 
-              {mode !== 'menu' && !roomOpen && (
+              {mode === 'effects' && (
+                <div className="live-studio-room">
+                  <div className="live-studio-room-header">
+                    <div>
+                      <p className="eyebrow">LunarWolf Vision</p>
+                      <strong id="live-studio-title">Browser camera effects prototype</strong>
+                    </div>
+                    <button className="live-studio-secondary" type="button" onClick={returnToMenu}>
+                      Back
+                    </button>
+                  </div>
+                  <VisionStudioPanel />
+                </div>
+              )}
+
+              {mode !== 'menu' && mode !== 'effects' && !roomOpen && (
                 <div className="live-studio-content">
                   <p className="eyebrow">
                     {mode === 'watch' ? 'Muted viewer entry' : 'Live participant entry'}
@@ -158,7 +183,7 @@ export default function LiveStudioPortal() {
                 </div>
               )}
 
-              {mode !== 'menu' && roomOpen && (
+              {mode !== 'menu' && mode !== 'effects' && roomOpen && (
                 <div className="live-studio-room">
                   <div className="live-studio-room-header">
                     <div>
