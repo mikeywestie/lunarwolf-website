@@ -10,6 +10,7 @@ import {
   X,
 } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
+import VisionGestureController from './VisionGestureController'
 import VisionStudioPanel from './VisionStudioPanel'
 import './live-studio.css'
 import './live-studio-room.css'
@@ -121,7 +122,7 @@ export default function LiveStudioPortal() {
                       </span>
                       <strong>Vision Studio</strong>
                       <small>
-                        Test live camera transparency, portal effects, freeze, and snapshots.
+                        Test live camera effects, AI segmentation, and touch-free gesture controls.
                       </small>
                     </button>
                   </div>
@@ -148,6 +149,7 @@ export default function LiveStudioPortal() {
                     </button>
                   </div>
                   <VisionStudioPanel />
+                  <VisionGestureController />
                 </div>
               )}
 
