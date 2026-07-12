@@ -1,18 +1,79 @@
 import { useEffect, useRef, useState } from 'react'
-import { Camera, CameraOff, CircleDot, Download, Pause, Play, Sparkles } from 'lucide-react'
+import {
+  Blend,
+  Camera,
+  CameraOff,
+  CircleDot,
+  Download,
+  Image,
+  Pause,
+  Play,
+  ScanLine,
+  Sparkles,
+} from 'lucide-react'
 import './vision-studio.css'
 
-type EffectMode = 'normal' | 'ghost' | 'portal'
+type EffectMode = 'normal' | 'ghost' | 'portal' | 'blur' | 'replace' | 'cutout'
+type SegmenterStatus = 'idle' | 'loading' | 'ready' | 'error'
+
+type ConfidenceMask = {
+  width: number
+  height: number
+  getAsFloat32Array: () => Float32Array
+}
+
+type SegmentationResult = {
+  confidenceMasks?: ConfidenceMask[]
+}
+
+type ImageSegmenterInstance = {
+  segmentForVideo: (
+    video: HTMLVideoElement,
+    timestampMs: number,
+    callback: (result: SegmentationResult) => void,
+  ) => void
+  close: () => void
+}
+
+type MediaPipeVisionModule = {
+  FilesetResolver: {
+    forVisionTasks: (wasmPath: string) => Promise<unknown>
+  }
+  ImageSegmenter: {
+    createFromOptions: (
+      vision: unknown,
+      options: {
+        baseOptions: { modelAssetPath: string; delegate: 'GPU' | 'CPU' }
+        runningMode: 'VIDEO'
+        outputCategoryMask: false
+        outputConfidenceMasks: true
+      },
+    ) => Promise<ImageSegmenterInstance>
+  }
+}
+
+const mediaPipeModuleUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/+esm'
+const mediaPipeWasmUrl = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.22/wasm'
+const selfieSegmenterModelUrl =
+  'https://storage.googleapis.com/mediapipe-models/image_segmenter/selfie_segmenter_landscape/float16/latest/selfie_segmenter_landscape.tflite'
+
+const segmentationEffects: EffectMode[] = ['blur', 'replace', 'cutout']
 
 export default function VisionStudioPanel() {
   const videoRef = useRef<HTMLVideoElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const animationRef = useRef<number | null>(null)
+  const segmenterRef = useRef<ImageSegmenterInstance | null>(null)
+  const maskCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const sourceCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const personCanvasRef = useRef<HTMLCanvasElement | null>(null)
+  const lastSegmentationRef = useRef(0)
   const [cameraOn, setCameraOn] = useState(false)
   const [frozen, setFrozen] = useState(false)
   const [effect, setEffect] = useState<EffectMode>('normal')
   const [opacity, setOpacity] = useState(55)
+  const [segmenterStatus, setSegmenterStatus] = useState<SegmenterStatus>('idle')
   const [error, setError] = useState('')
 
   const stopCamera = () => {
@@ -23,12 +84,75 @@ export default function VisionStudioPanel() {
     setCameraOn(false)
   }
 
-  useEffect(() => stopCamera, [])
+  useEffect(
+    () => () => {
+      stopCamera()
+      segmenterRef.current?.close()
+      segmenterRef.current = null
+    },
+    [],
+  )
+
+  const loadSegmenter = async () => {
+    if (segmenterRef.current || segmenterStatus === 'loading') return
+
+    setSegmenterStatus('loading')
+    setError('')
+
+    try {
+      const visionModule = (await import(
+        /* @vite-ignore */ mediaPipeModuleUrl
+      )) as MediaPipeVisionModule
+      const vision = await visionModule.FilesetResolver.forVisionTasks(mediaPipeWasmUrl)
+      segmenterRef.current = await visionModule.ImageSegmenter.createFromOptions(vision, {
+        baseOptions: {
+          modelAssetPath: selfieSegmenterModelUrl,
+          delegate: 'GPU',
+        },
+        runningMode: 'VIDEO',
+        outputCategoryMask: false,
+        outputConfidenceMasks: true,
+      })
+      setSegmenterStatus('ready')
+    } catch {
+      setSegmenterStatus('error')
+      setError('Presenter segmentation could not load. Check your connection and try again.')
+    }
+  }
+
+  useEffect(() => {
+    if (segmentationEffects.includes(effect)) void loadSegmenter()
+  }, [effect])
+
+  const updateMask = (result: SegmentationResult) => {
+    const confidenceMask = result.confidenceMasks?.[0]
+    if (!confidenceMask) return
+
+    const values = confidenceMask.getAsFloat32Array()
+    const maskCanvas = maskCanvasRef.current ?? document.createElement('canvas')
+    maskCanvasRef.current = maskCanvas
+    maskCanvas.width = confidenceMask.width
+    maskCanvas.height = confidenceMask.height
+
+    const maskContext = maskCanvas.getContext('2d')
+    if (!maskContext) return
+
+    const imageData = maskContext.createImageData(confidenceMask.width, confidenceMask.height)
+    for (let index = 0; index < values.length; index += 1) {
+      const alpha = Math.round(Math.min(1, Math.max(0, values[index])) * 255)
+      const offset = index * 4
+      imageData.data[offset] = 255
+      imageData.data[offset + 1] = 255
+      imageData.data[offset + 2] = 255
+      imageData.data[offset + 3] = alpha
+    }
+    maskContext.putImageData(imageData, 0, 0)
+  }
 
   useEffect(() => {
     if (!cameraOn || frozen) return
 
-    const draw = () => {
+    const draw = (timestamp: number) => {
       const video = videoRef.current
       const canvas = canvasRef.current
       if (!video || !canvas || video.readyState < 2) {
@@ -46,52 +170,126 @@ export default function VisionStudioPanel() {
       const context = canvas.getContext('2d')
       if (!context) return
 
-      context.clearRect(0, 0, width, height)
-      context.save()
-      context.translate(width, 0)
-      context.scale(-1, 1)
+      const sourceCanvas = sourceCanvasRef.current ?? document.createElement('canvas')
+      const personCanvas = personCanvasRef.current ?? document.createElement('canvas')
+      sourceCanvasRef.current = sourceCanvas
+      personCanvasRef.current = personCanvas
+      sourceCanvas.width = width
+      sourceCanvas.height = height
+      personCanvas.width = width
+      personCanvas.height = height
 
-      if (effect === 'ghost') {
-        context.globalAlpha = opacity / 100
+      const sourceContext = sourceCanvas.getContext('2d')
+      const personContext = personCanvas.getContext('2d')
+      if (!sourceContext || !personContext) return
+
+      sourceContext.clearRect(0, 0, width, height)
+      sourceContext.save()
+      sourceContext.translate(width, 0)
+      sourceContext.scale(-1, 1)
+      sourceContext.drawImage(video, 0, 0, width, height)
+      sourceContext.restore()
+
+      const usesSegmentation = segmentationEffects.includes(effect)
+      if (
+        usesSegmentation &&
+        segmenterRef.current &&
+        timestamp - lastSegmentationRef.current >= 66
+      ) {
+        lastSegmentationRef.current = timestamp
+        segmenterRef.current.segmentForVideo(video, timestamp, updateMask)
       }
 
-      context.drawImage(video, 0, 0, width, height)
-      context.restore()
+      context.clearRect(0, 0, width, height)
 
-      if (effect === 'portal') {
-        const radius = Math.min(width, height) * 0.22
-        const x = width * 0.68
-        const y = height * 0.45
+      if (usesSegmentation && maskCanvasRef.current) {
+        personContext.clearRect(0, 0, width, height)
+        personContext.drawImage(sourceCanvas, 0, 0, width, height)
+        personContext.globalCompositeOperation = 'destination-in'
+        personContext.save()
+        personContext.translate(width, 0)
+        personContext.scale(-1, 1)
+        personContext.drawImage(maskCanvasRef.current, 0, 0, width, height)
+        personContext.restore()
+        personContext.globalCompositeOperation = 'source-over'
 
-        context.save()
-        context.beginPath()
-        context.arc(x, y, radius, 0, Math.PI * 2)
-        context.clip()
-        context.globalAlpha = opacity / 100
-        context.translate(width, 0)
-        context.scale(-1, 1)
-        context.drawImage(video, 0, 0, width, height)
-        context.restore()
+        if (effect === 'blur') {
+          context.save()
+          context.filter = 'blur(18px)'
+          context.drawImage(sourceCanvas, -24, -24, width + 48, height + 48)
+          context.restore()
+          context.drawImage(personCanvas, 0, 0)
+        }
 
-        const gradient = context.createLinearGradient(
-          x - radius,
-          y - radius,
-          x + radius,
-          y + radius,
-        )
-        gradient.addColorStop(0, 'rgba(128, 220, 255, 0.95)')
-        gradient.addColorStop(0.5, 'rgba(179, 121, 255, 0.95)')
-        gradient.addColorStop(1, 'rgba(255, 255, 255, 0.9)')
-        context.strokeStyle = gradient
-        context.lineWidth = Math.max(6, width * 0.008)
-        context.shadowBlur = 24
-        context.shadowColor = 'rgba(153, 109, 255, 0.9)'
-        context.beginPath()
-        context.arc(x, y, radius, 0, Math.PI * 2)
-        context.stroke()
+        if (effect === 'replace') {
+          const gradient = context.createRadialGradient(
+            width * 0.48,
+            height * 0.38,
+            20,
+            width * 0.5,
+            height * 0.5,
+            Math.max(width, height),
+          )
+          gradient.addColorStop(0, '#342060')
+          gradient.addColorStop(0.45, '#11152f')
+          gradient.addColorStop(1, '#050816')
+          context.fillStyle = gradient
+          context.fillRect(0, 0, width, height)
+          context.globalAlpha = 0.35
+          for (let x = 0; x < width; x += 72) {
+            for (let y = 0; y < height; y += 72) {
+              context.fillStyle = (x + y) % 144 === 0 ? '#9d7bff' : '#4fc3ff'
+              context.beginPath()
+              context.arc(x, y, 1.8, 0, Math.PI * 2)
+              context.fill()
+            }
+          }
+          context.globalAlpha = 1
+          context.drawImage(personCanvas, 0, 0)
+        }
+
+        if (effect === 'cutout') {
+          context.drawImage(personCanvas, 0, 0)
+        }
+      } else {
+        if (effect === 'ghost') context.globalAlpha = opacity / 100
+        context.drawImage(sourceCanvas, 0, 0)
+        context.globalAlpha = 1
+
+        if (effect === 'portal') {
+          const radius = Math.min(width, height) * 0.22
+          const x = width * 0.68
+          const y = height * 0.45
+
+          context.save()
+          context.beginPath()
+          context.arc(x, y, radius, 0, Math.PI * 2)
+          context.clip()
+          context.globalAlpha = opacity / 100
+          context.drawImage(sourceCanvas, 0, 0)
+          context.restore()
+
+          const gradient = context.createLinearGradient(
+            x - radius,
+            y - radius,
+            x + radius,
+            y + radius,
+          )
+          gradient.addColorStop(0, 'rgba(128, 220, 255, 0.95)')
+          gradient.addColorStop(0.5, 'rgba(179, 121, 255, 0.95)')
+          gradient.addColorStop(1, 'rgba(255, 255, 255, 0.9)')
+          context.strokeStyle = gradient
+          context.lineWidth = Math.max(6, width * 0.008)
+          context.shadowBlur = 24
+          context.shadowColor = 'rgba(153, 109, 255, 0.9)'
+          context.beginPath()
+          context.arc(x, y, radius, 0, Math.PI * 2)
+          context.stroke()
+        }
       }
 
       context.globalAlpha = 1
+      context.filter = 'none'
       context.fillStyle = 'rgba(5, 8, 20, 0.65)'
       context.fillRect(20, height - 58, 245, 36)
       context.fillStyle = '#ffffff'
@@ -101,7 +299,7 @@ export default function VisionStudioPanel() {
       animationRef.current = requestAnimationFrame(draw)
     }
 
-    draw()
+    animationRef.current = requestAnimationFrame(draw)
     return () => {
       if (animationRef.current) cancelAnimationFrame(animationRef.current)
     }
@@ -135,6 +333,11 @@ export default function VisionStudioPanel() {
     link.click()
   }
 
+  const chooseEffect = (nextEffect: EffectMode) => {
+    setEffect(nextEffect)
+    setError('')
+  }
+
   return (
     <div className="vision-studio">
       <div className="vision-stage">
@@ -147,44 +350,81 @@ export default function VisionStudioPanel() {
             <span>Your camera stays on this device while the preview is processed.</span>
           </div>
         )}
+        {segmenterStatus === 'loading' && (
+          <div className="vision-model-status" role="status">
+            <ScanLine size={18} /> Loading presenter AI…
+          </div>
+        )}
       </div>
 
       <div className="vision-controls">
-        <div className="vision-effect-grid" role="group" aria-label="Camera effect">
-          <button
-            className={effect === 'normal' ? 'active' : ''}
-            onClick={() => setEffect('normal')}
-            type="button"
-          >
-            <Camera size={18} /> Normal
-          </button>
-          <button
-            className={effect === 'ghost' ? 'active' : ''}
-            onClick={() => setEffect('ghost')}
-            type="button"
-          >
-            <Sparkles size={18} /> Ghost
-          </button>
-          <button
-            className={effect === 'portal' ? 'active' : ''}
-            onClick={() => setEffect('portal')}
-            type="button"
-          >
-            <CircleDot size={18} /> Portal
-          </button>
+        <div className="vision-control-section">
+          <span className="vision-control-label">Camera effects</span>
+          <div className="vision-effect-grid" role="group" aria-label="Camera effect">
+            <button
+              className={effect === 'normal' ? 'active' : ''}
+              onClick={() => chooseEffect('normal')}
+              type="button"
+            >
+              <Camera size={18} /> Normal
+            </button>
+            <button
+              className={effect === 'ghost' ? 'active' : ''}
+              onClick={() => chooseEffect('ghost')}
+              type="button"
+            >
+              <Sparkles size={18} /> Ghost
+            </button>
+            <button
+              className={effect === 'portal' ? 'active' : ''}
+              onClick={() => chooseEffect('portal')}
+              type="button"
+            >
+              <CircleDot size={18} /> Portal
+            </button>
+          </div>
         </div>
 
-        <label className="vision-opacity">
-          <span>Effect opacity</span>
-          <strong>{opacity}%</strong>
-          <input
-            type="range"
-            min="10"
-            max="100"
-            value={opacity}
-            onChange={(event) => setOpacity(Number(event.target.value))}
-          />
-        </label>
+        <div className="vision-control-section">
+          <span className="vision-control-label">AI presenter effects</span>
+          <div className="vision-effect-grid" role="group" aria-label="Presenter effect">
+            <button
+              className={effect === 'blur' ? 'active' : ''}
+              onClick={() => chooseEffect('blur')}
+              type="button"
+            >
+              <Blend size={18} /> Blur
+            </button>
+            <button
+              className={effect === 'replace' ? 'active' : ''}
+              onClick={() => chooseEffect('replace')}
+              type="button"
+            >
+              <Image size={18} /> Replace
+            </button>
+            <button
+              className={effect === 'cutout' ? 'active' : ''}
+              onClick={() => chooseEffect('cutout')}
+              type="button"
+            >
+              <ScanLine size={18} /> Cutout
+            </button>
+          </div>
+        </div>
+
+        {(effect === 'ghost' || effect === 'portal') && (
+          <label className="vision-opacity">
+            <span>Effect opacity</span>
+            <strong>{opacity}%</strong>
+            <input
+              type="range"
+              min="10"
+              max="100"
+              value={opacity}
+              onChange={(event) => setOpacity(Number(event.target.value))}
+            />
+          </label>
+        )}
 
         <div className="vision-actions">
           {!cameraOn ? (
@@ -221,8 +461,8 @@ export default function VisionStudioPanel() {
           </p>
         )}
         <p className="vision-note">
-          Prototype pipeline: webcam → canvas effects → browser MediaStream-ready output. Gesture
-          recognition and person segmentation are the next layer.
+          Phase 2: on-device presenter segmentation for background blur, LunarWolf replacement,
+          and transparent cutout output. The model downloads only when an AI effect is selected.
         </p>
       </div>
     </div>
