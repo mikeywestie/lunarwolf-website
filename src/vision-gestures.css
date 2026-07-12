@@ -1,0 +1,88 @@
+.vision-gesture-card {
+  margin: 0 1.5rem 1.5rem;
+  padding: 1rem;
+  border: 1px solid rgba(164, 130, 255, 0.18);
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(121, 87, 255, 0.1), rgba(36, 87, 139, 0.08));
+}
+
+.vision-gesture-heading,
+.vision-gesture-heading > span,
+.vision-gesture-heading button,
+.vision-gesture-status {
+  display: flex;
+  align-items: center;
+}
+
+.vision-gesture-heading {
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.vision-gesture-heading > span {
+  gap: 0.5rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.vision-gesture-heading button {
+  gap: 0.4rem;
+  min-height: 38px;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.72);
+  cursor: pointer;
+}
+
+.vision-gesture-heading button.enabled {
+  border-color: rgba(126, 224, 255, 0.45);
+  background: rgba(74, 187, 255, 0.14);
+  color: #fff;
+}
+
+.vision-gesture-status {
+  gap: 0.55rem;
+  min-height: 44px;
+  margin-top: 0.8rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 13px;
+  background: rgba(5, 8, 22, 0.52);
+  color: rgba(232, 241, 255, 0.88);
+}
+
+.vision-gesture-help {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.vision-gesture-help span {
+  padding: 0.38rem 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: 999px;
+  color: rgba(220, 231, 255, 0.65);
+  font-size: 0.76rem;
+}
+
+.vision-gesture-spinner {
+  animation: vision-gesture-spin 0.9s linear infinite;
+}
+
+@keyframes vision-gesture-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (max-width: 560px) {
+  .vision-gesture-card {
+    margin: 0 1rem 1rem;
+  }
+
+  .vision-gesture-heading {
+    align-items: flex-start;
+  }
+}
