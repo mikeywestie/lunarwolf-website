@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ArrowRight, Bot, MapPin, PawPrint, Sparkles } from 'lucide-react'
+import { ArrowRight, Bot, MapPin, PawPrint, Sparkles, type LucideIcon } from 'lucide-react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 import './success-stories.css'
@@ -11,7 +11,7 @@ type SuccessStory = {
   solution: string
   outcome: string
   services: string[]
-  icon: typeof PawPrint
+  icon: LucideIcon
   accent: 'pets' | 'automation'
   href: string
   action: string
