@@ -3,7 +3,11 @@
   padding: 1rem;
   border: 1px solid rgba(164, 130, 255, 0.18);
   border-radius: 18px;
-  background: linear-gradient(145deg, rgba(121, 87, 255, 0.1), rgba(36, 87, 139, 0.08));
+  background: linear-gradient(
+    145deg,
+    rgba(121, 87, 255, 0.1),
+    rgba(36, 87, 139, 0.08)
+  );
 }
 
 .vision-gesture-heading,
