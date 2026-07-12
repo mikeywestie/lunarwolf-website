@@ -35,6 +35,7 @@ const distance = (a: Landmark, b: Landmark) => Math.hypot(a.x - b.x, a.y - b.y)
 function setOpacity(value: number) {
   const slider = document.querySelector<HTMLInputElement>('.vision-opacity input[type="range"]')
   if (!slider) return
+
   const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')
   descriptor?.set?.call(slider, String(value))
   slider.dispatchEvent(new Event('input', { bubbles: true }))
@@ -66,6 +67,7 @@ export default function VisionGestureController() {
 
     const load = async () => {
       setStatus('loading')
+
       try {
         const visionModule = (await import(/* @vite-ignore */ moduleUrl)) as VisionModule
         const vision = await visionModule.FilesetResolver.forVisionTasks(wasmUrl)
@@ -77,10 +79,12 @@ export default function VisionGestureController() {
           minHandPresenceConfidence: 0.55,
           minTrackingConfidence: 0.5,
         })
+
         if (cancelled) {
           landmarker.close()
           return
         }
+
         landmarkerRef.current = landmarker
         setStatus('ready')
       } catch {
@@ -90,6 +94,7 @@ export default function VisionGestureController() {
     }
 
     void load()
+
     return () => {
       cancelled = true
       if (frameRef.current) cancelAnimationFrame(frameRef.current)
@@ -113,6 +118,7 @@ export default function VisionGestureController() {
         frameRef.current = requestAnimationFrame(loop)
         return
       }
+
       lastInferenceRef.current = timestamp
 
       const landmarks = landmarkerRef.current.detectForVideo(video, timestamp).landmarks?.[0]
@@ -139,7 +145,9 @@ export default function VisionGestureController() {
       const now = performance.now()
 
       if (pinchRatio < 1.45) {
-        const opacity = Math.round(Math.min(100, Math.max(10, 10 + (pinchRatio / 1.45) * 90)))
+        const opacity = Math.round(
+          Math.min(100, Math.max(10, 10 + (pinchRatio / 1.45) * 90)),
+        )
         setOpacity(opacity)
         setGesture(`Pinch · opacity ${opacity}%`)
         openPalmStartedRef.current = null
@@ -148,10 +156,12 @@ export default function VisionGestureController() {
         setGesture('Open palm · hold to freeze')
         fistStartedRef.current = null
         openPalmStartedRef.current ??= now
+
         if (now - openPalmStartedRef.current > 850 && now > cooldownRef.current) {
           const resumeVisible = Array.from(
             document.querySelectorAll<HTMLButtonElement>('.vision-actions button'),
           ).some((button) => button.textContent?.includes('Resume'))
+
           clickButton(resumeVisible ? 'Resume' : 'Freeze')
           cooldownRef.current = now + 1500
           openPalmStartedRef.current = null
@@ -160,10 +170,12 @@ export default function VisionGestureController() {
         setGesture('Closed fist · hold for invisibility')
         openPalmStartedRef.current = null
         fistStartedRef.current ??= now
+
         if (now - fistStartedRef.current > 950 && now > cooldownRef.current) {
           const cutoutActive = document
             .querySelector<HTMLButtonElement>('.vision-effect-grid button.active')
             ?.textContent?.includes('Cutout')
+
           clickButton(cutoutActive ? 'Normal' : 'Cutout')
           cooldownRef.current = now + 1700
           fistStartedRef.current = null
@@ -178,6 +190,7 @@ export default function VisionGestureController() {
     }
 
     frameRef.current = requestAnimationFrame(loop)
+
     return () => {
       if (frameRef.current) cancelAnimationFrame(frameRef.current)
       frameRef.current = null
@@ -200,10 +213,12 @@ export default function VisionGestureController() {
           {enabled ? 'On' : 'Off'}
         </button>
       </div>
+
       <div className="vision-gesture-status" role="status">
         {status === 'loading' && <LoaderCircle className="vision-gesture-spinner" size={17} />}
         <strong>{status === 'loading' ? 'Loading hand tracking…' : gesture}</strong>
       </div>
+
       <div className="vision-gesture-help">
         <span>Pinch: opacity</span>
         <span>Open palm: freeze/resume</span>
